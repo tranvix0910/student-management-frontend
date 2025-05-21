@@ -24,12 +24,13 @@ pipeline {
                     
                     CI_COMMIT_SHORT_SHA = CI_COMMIT_HASH.take(8)
 
-                    CI_COMMIT_TAG = sh(
-                        script: "git describe --tags --exact-match ${CI_COMMIT_HASH}",
-                        returnStdout: true
-                    ).trim()
+                    // CI_COMMIT_TAG = sh(
+                    //     script: "git describe --tags --exact-match ${CI_COMMIT_HASH}",
+                    //     returnStdout: true
+                    // ).trim()
 
-                    IMAGE_VERSION = "${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}_${CI_COMMIT_TAG}"
+                    // IMAGE_VERSION = "${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}_${CI_COMMIT_TAG}"
+                    IMAGE_VERSION = "${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}"
                 }
             }
         }
