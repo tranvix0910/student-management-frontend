@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     CI_PROJECT_NAME = sh(
-                        script: "git remote show origin -n | grep Fetch | cut -d'/' -f$ | cut -d'.' -f1",
+                        script: "git remote show origin -n | grep Fetch | cut -d'/' -f5 | cut -d'.' -f1",
                         returnStdout: true
                     ).trim()
 
