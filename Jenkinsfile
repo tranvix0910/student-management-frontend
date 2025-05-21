@@ -36,6 +36,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh(
+                    script: "pwd"
+                )
+                sh(
                     script: "docker build -t ${IMAGE_VERSION} -f Dockerfile .",
                     label: "Build Docker Image"
                 )
