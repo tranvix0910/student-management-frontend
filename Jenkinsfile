@@ -41,7 +41,7 @@ pipeline {
                 sh(
                     script: "docker run --tty --rm \
                         --env CODECLIMATE_CODE=\"$PWD\" \
-                        --volume \"$PWD\":/code \
+                        --volume $PWD:/code \
                         --volume /var/run/docker.sock:/var/run/docker.sock \
                         --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze \
                         -f html > ${CODECLIMATE_REPORT}.html",
@@ -61,15 +61,15 @@ pipeline {
             steps {
                 sh(
                     script: "docker run --rm \
-                        -v $(pwd):/${CI_PROJECT_NAME} \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        --volume $PWD:/${CI_PROJECT_NAME} \
+                        --volume /var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy clean --all",
                     label: "Clean Trivy"
                 )
                 sh(
                     script: "docker run --rm \
-                        -v $PWD:/${CI_PROJECT_NAME} \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        --volume $PWD:/${CI_PROJECT_NAME} \
+                        --volume /var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy fs /${CI_PROJECT_NAME} --severity HIGH,CRITICAL \
                         --format template --template \"@contrib/html.tpl\" \
                         --output /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html",
