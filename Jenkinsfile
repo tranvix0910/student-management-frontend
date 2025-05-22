@@ -9,6 +9,8 @@ pipeline {
         IMAGE_VERSION = ""
 
         AWS_DEFAULT_REGION = "ap-southeast-1"
+        ECR_URL = "022499043310.dkr.ecr.ap-southeast-1.amazonaws.com"
+        ECR_REPO = "student-management/frontend"
     }
     stages {
         stage('Clean Workspace') {
@@ -105,11 +107,15 @@ pipeline {
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tranvix0910-tranvix-accessKeys', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh(
-                        script: "aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 022499043310.dkr.ecr.ap-southeast-1.amazonaws.com",
+                        script: "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_URL}",
                         label: "Login to ECR"
                     )
                     sh(
-                        script: "docker push ${IMAGE_VERSION}",
+                        script: "docker tag ${IMAGE_VERSION} ${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}",
+                        label: "Tag Image"
+                    )
+                    sh(
+                        script: "docker push ${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}",
                         label: "Push Image to ECR"
                     )
                     sh(
