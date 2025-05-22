@@ -99,5 +99,21 @@ pipeline {
                 )
             }
         }
+        stage('Push Image to ECR') {
+            steps {
+                sh(
+                    script: "aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 022499043310.dkr.ecr.ap-southeast-1.amazonaws.com",
+                    label: "Login to ECR"
+                )
+                sh(
+                    script: "docker push ${IMAGE_VERSION}",
+                    label: "Push Image to ECR"
+                )
+                sh(
+                    script: "docker logout",
+                    label: "Logout from ECR"
+                )
+            }
+        }
     }
 }
