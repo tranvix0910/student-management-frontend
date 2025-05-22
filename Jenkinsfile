@@ -9,6 +9,11 @@ pipeline {
         IMAGE_VERSION = ""
     }
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Get Infomation Project') {
             steps {
                 script {
@@ -76,6 +81,15 @@ pipeline {
                         --format template --template \"@contrib/html.tpl\" \
                         --output /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html",
                     label: "Trivy Scan Image"
+                )
+                sh(
+                    script: "cp /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html ${WORKSPACE}/${TRIVY_IMAGE_REPORT}.html || true",
+                    label: "Copy Trivy Report to Workspace"
+                )
+                archiveArtifacts(
+                    artifacts: "${TRIVY_IMAGE_REPORT}.html",
+                    allowEmptyArchive: true,
+                    fingerprint: true
                 )
             }
         }
