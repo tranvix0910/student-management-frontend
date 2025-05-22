@@ -7,6 +7,8 @@ pipeline {
         CI_COMMIT_TAG = ""
         CI_PROJECT_NAME = ""
         IMAGE_VERSION = ""
+
+        AWS_DEFAULT_REGION = "ap-southeast-1"
     }
     stages {
         stage('Clean Workspace') {
@@ -101,18 +103,20 @@ pipeline {
         }
         stage('Push Image to ECR') {
             steps {
-                sh(
-                    script: "aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 022499043310.dkr.ecr.ap-southeast-1.amazonaws.com",
-                    label: "Login to ECR"
-                )
-                sh(
-                    script: "docker push ${IMAGE_VERSION}",
-                    label: "Push Image to ECR"
-                )
-                sh(
-                    script: "docker logout",
-                    label: "Logout from ECR"
-                )
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tranvix0910-tranvix-accessKeys', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh(
+                        script: "aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 022499043310.dkr.ecr.ap-southeast-1.amazonaws.com",
+                        label: "Login to ECR"
+                    )
+                    sh(
+                        script: "docker push ${IMAGE_VERSION}",
+                        label: "Push Image to ECR"
+                    )
+                    sh(
+                        script: "docker logout",
+                        label: "Logout from ECR"
+                    )
+                }   
             }
         }
     }
