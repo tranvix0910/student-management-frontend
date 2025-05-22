@@ -88,8 +88,12 @@ pipeline {
                         --output /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html",
                     label: "Trivy Scan Image"
                 )
+                sh(
+                    script: "cp /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html ${WORKSPACE}/${TRIVY_IMAGE_REPORT}.html || true",
+                    label: "Copy Trivy Report to Workspace"
+                )
                 archiveArtifacts(
-                    artifacts: "$PWD/${TRIVY_IMAGE_REPORT}.html",
+                    artifacts: "${TRIVY_IMAGE_REPORT}.html",
                     allowEmptyArchive: true,
                     fingerprint: true
                 )
