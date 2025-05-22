@@ -7,6 +7,8 @@ pipeline {
         CI_COMMIT_TAG = ""
         CI_PROJECT_NAME = ""
         IMAGE_VERSION = ""
+        TRIVY_IMAGE_REPORT: "SCAN_IMAGE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
+        CODECLIMATE_REPORT: "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
     }
     stages {
         stage('Get Infomation Project') {
@@ -34,11 +36,44 @@ pipeline {
                 }
             }
         }
+        stage('Test Source Code') {
+            steps {
+                sh(
+                    script: "docker run --tty --rm \
+                        --env CODECLIMATE_CODE=\"$PWD\" \
+                        --volume \"$PWD\":/code \
+                        --volume /var/run/docker.sock:/var/run/docker.sock \
+                        --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze \
+                        -f html > ${CODECLIMATE_REPORT}.html",
+                    label: "Test Source Code"
+                )
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 sh(
                     script: "docker build -t ${IMAGE_VERSION} .",
                     label: "Build Docker Image"
+                )
+            }
+        }
+        stage('Trivy Scan Image') {
+            steps {
+                sh(
+                    script: "docker run --rm \
+                        -v $(pwd):/${CI_PROJECT_NAME} \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy clean --all",
+                    label: "Clean Trivy"
+                )
+                sh(
+                    script: "docker run --rm \
+                        -v $PWD:/${CI_PROJECT_NAME} \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy fs /${CI_PROJECT_NAME} --severity HIGH,CRITICAL \
+                        --format template --template \"@contrib/html.tpl\" \
+                        --output /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html",
+                    label: "Trivy Scan Image"
                 )
             }
         }
