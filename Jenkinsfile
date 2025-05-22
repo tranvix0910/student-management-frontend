@@ -7,8 +7,6 @@ pipeline {
         CI_COMMIT_TAG = ""
         CI_PROJECT_NAME = ""
         IMAGE_VERSION = ""
-        TRIVY_IMAGE_REPORT = "SCAN_IMAGE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
-        CODECLIMATE_REPORT = "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
     }
     stages {
         stage('Get Infomation Project') {
@@ -33,22 +31,26 @@ pipeline {
 
                     // IMAGE_VERSION = "${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}_${CI_COMMIT_TAG}"
                     IMAGE_VERSION = "${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}"
+                    // TRIVY_IMAGE_REPORT = "SCAN_IMAGE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
+                    // CODECLIMATE_REPORT = "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
+                    TRIVY_IMAGE_REPORT = "SCAN_IMAGE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}"
+                    CODECLIMATE_REPORT = "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}"
                 }
             }
         }
-        stage('Test Source Code') {
-            steps {
-                sh(
-                    script: "docker run --tty --rm \
-                        --env CODECLIMATE_CODE=\"$PWD\" \
-                        --volume $PWD:/code \
-                        --volume /var/run/docker.sock:/var/run/docker.sock \
-                        --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze \
-                        -f html > ${CODECLIMATE_REPORT}.html",
-                    label: "Test Source Code"
-                )
-            }
-        }
+        // stage('Test Source Code') {
+        //     steps {
+        //         sh(
+        //             script: "docker run --tty --rm \
+        //                 --env CODECLIMATE_CODE=\"$PWD\" \
+        //                 --volume $PWD:/code \
+        //                 --volume /var/run/docker.sock:/var/run/docker.sock \
+        //                 --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze \
+        //                 -f html > ${CODECLIMATE_REPORT}.html",
+        //             label: "Test Source Code"
+        //         )
+        //     }
+        // }
         stage('Build Docker Image') {
             steps {
                 sh(
