@@ -74,18 +74,18 @@ pipeline {
             steps {
                 sh(
                     script: "docker run --rm \
-                        --volume ${WORKSPACE}:/workspace \
+                        --volume $PWD:/${CI_PROJECT_NAME} \
                         --volume /var/run/docker.sock:/var/run/docker.sock \
                         aquasec/trivy clean --all",
                     label: "Clean Trivy"
                 )
                 sh(
                     script: "docker run --rm \
-                        --volume ${WORKSPACE}:/workspace \
+                        --volume $PWD:/${CI_PROJECT_NAME} \
                         --volume /var/run/docker.sock:/var/run/docker.sock \
-                        aquasec/trivy fs /workspace --severity HIGH,CRITICAL \
+                        aquasec/trivy fs /${CI_PROJECT_NAME} --severity HIGH,CRITICAL \
                         --format template --template \"@contrib/html.tpl\" \
-                        --output /workspace/${TRIVY_IMAGE_REPORT}.html",
+                        --output /${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html",
                     label: "Trivy Scan Image"
                 )
                 archiveArtifacts(
