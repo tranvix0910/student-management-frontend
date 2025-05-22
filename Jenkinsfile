@@ -93,7 +93,7 @@ pipeline {
                     label: "Trivy Scan Image"
                 )
                 sh(
-                    script: "cp \"/${CI_PROJECT_NAME}/${TRIVY_IMAGE_REPORT}.html\" \"${WORKSPACE}/${TRIVY_IMAGE_REPORT}.html\" || true",
+                    script: "cp \"/$PWD/${TRIVY_IMAGE_REPORT}.html\" \"${WORKSPACE}/${TRIVY_IMAGE_REPORT}.html\" || true",
                     label: "Copy Trivy Report to Workspace"
                 )
                 archiveArtifacts(
