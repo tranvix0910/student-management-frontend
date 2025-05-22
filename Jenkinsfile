@@ -14,6 +14,12 @@ pipeline {
                 cleanWs()
             }
         }
+        stage('Checkout From Git'){
+            steps{
+                git branch: 'main', 
+                url: 'https://github.com/tranvix0910/student-management-frontend.git'
+            }
+        }
         stage('Get Infomation Project') {
             steps {
                 script {
