@@ -89,7 +89,7 @@ pipeline {
                     label: "Trivy Scan Image"
                 )
                 archiveArtifacts(
-                    artifacts: "${TRIVY_IMAGE_REPORT}.html",
+                    artifacts: "$PWD/${TRIVY_IMAGE_REPORT}.html",
                     allowEmptyArchive: true,
                     fingerprint: true
                 )
