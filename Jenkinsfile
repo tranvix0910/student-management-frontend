@@ -11,6 +11,10 @@ pipeline {
         AWS_DEFAULT_REGION = "ap-southeast-1"
         ECR_URL = "022499043310.dkr.ecr.ap-southeast-1.amazonaws.com"
         ECR_REPO = "student-management/frontend"
+        
+        TASK_FAMILY = "frontend-task-definition"
+        CLUSTER_NAME = "student-management-cluster"
+        SERVICE_NAME = "student-management-frontend"
     }
     stages {
         stage('Clean Workspace') {
@@ -123,6 +127,42 @@ pipeline {
                         label: "Logout from ECR"
                     )
                 }   
+            }
+        }
+        stage('Update Task Definition') {
+            steps {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tranvix0910-tranvix-accessKeys', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh(
+                        script: "TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --region ${AWS_DEFAULT_REGION})",
+                        label: "Get Task Definition"
+                    )
+                    sh(
+                        script: """
+                            NEW_TASK_DEFINITION=\$(echo \$TASK_DEFINITION | jq --arg IMAGE "\${IMAGE_VERSION}" '.taskDefinition |
+                            .containerDefinitions[0].image = \$IMAGE |
+                            del(.taskDefinitionArn) |
+                            del(.revision) |
+                            del(.status) |
+                            del(.requiresAttributes) |
+                            del(.compatibilities) |
+                            del(.registeredAt) |
+                            del(.registeredBy)')
+                        """,
+                        label: "Update Task Definition"
+                    )
+                    sh(
+                        script: "NEW_TASK_INFO=$(aws ecs register-task-definition --region ${AWS_DEFAULT_REGION} --cli-input-json \"\$NEW_TASK_DEFINITION\")",
+                        label: "Register Task Definition"
+                    )
+                    sh(
+                        script: "NEW_REVISION=$(echo \$NEW_TASK_INFO | jq '.taskDefinition.revision')",
+                        label: "Get New Revision"
+                    )
+                    sh(
+                        script: "aws ecs update-service --cluster ${CLUSTER_NAME} --service ${SERVICE_NAME} --task-definition ${TASK_FAMILY}:${NEW_REVISION} --force-new-deployment",
+                        label: "Update Service"
+                    )
+                }
             }
         }
     }
