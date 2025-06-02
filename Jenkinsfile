@@ -133,7 +133,7 @@ pipeline {
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'tranvix0910-tranvix-accessKeys', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh(
-                        script: "TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --region ${AWS_DEFAULT_REGION})",
+                        script: "TASK_DEFINITION=\$(aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --region ${AWS_DEFAULT_REGION})",
                         label: "Get Task Definition"
                     )
                     sh(
