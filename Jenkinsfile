@@ -15,6 +15,8 @@ pipeline {
         TASK_FAMILY = "frontend-task-definition"
         CLUSTER_NAME = "student-management-cluster"
         SERVICE_NAME = "student-management-frontend"
+
+        FULL_IMAGE = "${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}"
     }
     stages {
         stage('Clean Workspace') {
@@ -115,11 +117,11 @@ pipeline {
                         label: "Login to ECR"
                     )
                     sh(
-                        script: "docker tag ${IMAGE_VERSION} ${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}",
+                        script: "docker tag ${IMAGE_VERSION} ${FULL_IMAGE}",
                         label: "Tag Image"
                     )
                     sh(
-                        script: "docker push ${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}",
+                        script: "docker push ${FULL_IMAGE}",
                         label: "Push Image to ECR"
                     )
                     sh(
@@ -135,7 +137,7 @@ pipeline {
                     sh(
                         script: """
                             TASK_DEFINITION=\$(aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --region ${AWS_DEFAULT_REGION})
-                            NEW_TASK_DEFINITION=\$(echo \$TASK_DEFINITION | jq --arg IMAGE "${IMAGE_VERSION}" '.taskDefinition |
+                            NEW_TASK_DEFINITION=\$(echo \$TASK_DEFINITION | jq --arg IMAGE "${FULL_IMAGE}" '.taskDefinition |
                                 .containerDefinitions[0].image = \$IMAGE |
                                 del(.taskDefinitionArn) |
                                 del(.revision) |
