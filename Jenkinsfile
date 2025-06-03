@@ -15,8 +15,6 @@ pipeline {
         TASK_FAMILY = "frontend-task-definition"
         CLUSTER_NAME = "student-management-cluster"
         SERVICE_NAME = "student-management-frontend"
-
-        FULL_IMAGE = "${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}"
     }
     stages {
         stage('Clean Workspace') {
@@ -56,6 +54,8 @@ pipeline {
                     // CODECLIMATE_REPORT = "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
                     TRIVY_IMAGE_REPORT = "SCAN_IMAGE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}"
                     CODECLIMATE_REPORT = "TEST_SOURCE_CODE_REPORT_${CI_PROJECT_NAME}_${CI_COMMIT_SHORT_SHA}"
+
+                    FULL_IMAGE = "${ECR_URL}/${ECR_REPO}:${CI_COMMIT_SHORT_SHA}"
                 }
             }
         }
